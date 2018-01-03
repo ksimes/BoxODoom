@@ -23,16 +23,20 @@ public class SerialComms {
     private static Logger log = LogManager.getLogger(SerialComms.class);
     private final Serial serial;
     private String comPort = Serial.DEFAULT_COM_PORT;
-    private int speed = 115200;
+    private int speed = 9600;     // Default com speed
 
     private String message;
     private ArrayBlockingQueue<String> messages = new ArrayBlockingQueue<>(20);
 
-    public SerialComms(String port) throws InterruptedException {
-
+    public SerialComms(String port, int speed) throws InterruptedException {
         if (port != null) {
             comPort = port;
         }
+
+        if (speed != 0) {
+            this.speed = speed;
+        }
+
         // create an instance of the serial communications class
         serial = SerialFactory.createInstance();
 
@@ -54,12 +58,20 @@ public class SerialComms {
         });
     }
 
+    public SerialComms(String port) throws InterruptedException {
+        this(port, 0);
+    }
+
     public SerialComms() throws InterruptedException {
-        this(null);
+        this(null, 0);
     }
 
     public String getPort() {
         return comPort;
+    }
+
+    public int getSpeed() {
+        return speed;
     }
 
     public ArrayBlockingQueue<String> messages() {

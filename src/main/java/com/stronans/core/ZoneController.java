@@ -38,11 +38,11 @@ public class ZoneController implements Runnable, PyroElectricListener {
         int count = 0;
         while (!finished) {
 //                Thread.sleep(1000);
-            delay(1000);
+            delay(500);
 
             count++;
 
-            if (count > 4) {
+            if (count > 9) {
                 count = 0;
                 log.trace("5 second ZoneController thread heartbeat");
             }

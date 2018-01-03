@@ -15,6 +15,7 @@ import static com.stronans.pyroelectric.PyroElectricName.*;
 
 public class BoxOfDoom {
     private static final String SERVO_CONTROLLER = "/dev/ttyUSB0";
+    private static final int SPEED = 115200;
     /**
      * The <code>Logger</code> to be used.
      */
@@ -28,11 +29,11 @@ public class BoxOfDoom {
             // create gpio controller
             final GpioController gpio = GpioFactory.getInstance();
 
-            ServoControllerNano = new SerialComms(SERVO_CONTROLLER);
+            ServoControllerNano = new SerialComms(SERVO_CONTROLLER, SPEED);
             ServoControllerNano.startComms();
 
-            // Setup pyroelectric
-            // All Zones to return activations to their own class
+            // Setup pyroelectric (PIR) Detectors
+            // All Zones to return activations to their own class for processing
             List<ZoneController> controllers = new ArrayList<>();
             int[] zone1Servos = {0, 1, 2, 3};
             controllers.add(new ZoneController(ServoControllerNano, new PyroElectric(ZONE1, gpio), zone1Servos));
@@ -43,13 +44,13 @@ public class BoxOfDoom {
             int[] zone4Servos = {12, 13, 14, 15};
             controllers.add(new ZoneController(ServoControllerNano, new PyroElectric(ZONE4, gpio), zone4Servos));
 
-            // Start the zones as their own threads to avoid complications.
+            // Start the zones as their own threads to avoid complications with timing loops in this thread.
             for (ZoneController zone : controllers) {
                 Thread zoneThread = new Thread(zone, zone.getName());
                 zoneThread.start();
             }
 
-            // Housekeeping
+            // Housekeeping at shutdown
             Runtime.getRuntime().addShutdownHook(new Thread() {
                                                      @Override
                                                      public void run() {

@@ -38,7 +38,7 @@ public class PyroElectric {
         thisPin.addListener(new GpioPinListenerDigital() {
             @Override
             public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-                // Pyroelectric goes high when it becomes active
+                // Pyroelectric detector goes high when it becomes active
                 if (event.getState().isHigh()) {
                     notifyListeners(gpioPin);
                 }
