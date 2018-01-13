@@ -65,6 +65,10 @@ Ardunio Nano pinouts used:
 
 ![alt text](./Arduino-Nano-V3.jpg "Ardunio Nano pinouts used")
 
+PIR Detectors: 
+
+![alt text](./PIR.PNG "Ardunio Nano pinouts used")
+
 Notes
 -----
 

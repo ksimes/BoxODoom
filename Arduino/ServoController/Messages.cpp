@@ -15,13 +15,15 @@ Messages::Messages() {
 }
 
 void Messages::anySerialEvent() {
-  while (Serial.available()) {
+  while (Serial.available() > 0) {
     // get the new byte:
     char inChar = (char)Serial.read();
     // if the incoming character is a newline, set a flag
     // so the main loop can do something about it:
     if (inChar == '\r') {
       msgAvailable = true;
+
+      Serial.println("Arduino received [" + msgs[bufferPointer] + "]");
 
       bufferPointer ++;
       if (bufferPointer == BUFFER_SIZE) {
@@ -32,6 +34,7 @@ void Messages::anySerialEvent() {
       msgs[bufferPointer] = "";
 
       msgCount ++;
+      Serial.println("msgCount [+" + String(msgCount) + "]");
 
       //      if (crlf) { // If expecting a cr/lf sequence then check the next character
       //        if (Serial.available()) {
@@ -66,19 +69,19 @@ String Messages::read(boolean blocking)
     if (lastRead == BUFFER_SIZE) {
       lastRead = 0;
     }
-    else {
-      result = String(msgs[lastRead]);
-      // Serial.println("result " + result);
-      lastRead ++;
-    }
+
+    result = String(msgs[lastRead]);
+    Serial.println("result [" + result + "]");
 
     msgCount --;
+    Serial.println("msgCount [-" + String(msgCount) + "]");
 
     if (msgCount <= 0) {
       msgAvailable = false;
       msgCount = 0;
     }
 
+    lastRead ++;
     return result;
   }
   else {

@@ -13,7 +13,7 @@ import java.util.List;
 import static com.pi4j.wiringpi.Gpio.delay;
 import static com.stronans.pyroelectric.PyroElectricName.*;
 
-public class BoxOfDoom {
+public class BoxOfDoom implements MessageListener {
     private static final String SERVO_CONTROLLER = "/dev/ttyUSB0";
     private static final int SPEED = 115200;
     /**
@@ -30,6 +30,7 @@ public class BoxOfDoom {
             final GpioController gpio = GpioFactory.getInstance();
 
             ServoControllerNano = new SerialComms(SERVO_CONTROLLER, SPEED);
+            ServoControllerNano.addListener(this);
             ServoControllerNano.startComms();
 
             // Setup pyroelectric (PIR) Detectors
@@ -90,16 +91,18 @@ public class BoxOfDoom {
                 count = 0;
                 log.trace("5 second main thread heartbeat");
             }
+        }
+    }
 
-            // Replies from the Ardunio Nano to be logger
-            if (ServoControllerNano.messagesAvailable()) {
-                try {
-                    log.info("Message back : " + ServoControllerNano.getMessage().trim());
-                } catch (InterruptedException e) {
-                    log.error("Error: ", e);
-                }
+    @Override
+    public void messageReceived() {
+        // Replies from the Ardunio Nano to be logger
+        while (ServoControllerNano.messagesAvailable()) {
+            try {
+                log.info("Message back : " + ServoControllerNano.getMessage().trim());
+            } catch (InterruptedException e) {
+                log.error("Error: ", e);
             }
         }
     }
 }
-

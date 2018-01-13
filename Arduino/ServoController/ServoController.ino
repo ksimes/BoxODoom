@@ -186,8 +186,8 @@ void loop() {
   String msg = messages->read(false);
 
   if (msg.length() > 0) {
-    Serial.println("processing [" + msg + "]");
     processCommand(msg);
+    Serial.println("Arduino processed [" + msg + "]");
   }
 }
 

@@ -9,11 +9,14 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  * Serial communications.
  * Created by S.King on 21/05/2016.
+ * Much improved S.King on 13/01/2018.
  */
 public class SerialComms {
 
@@ -24,9 +27,12 @@ public class SerialComms {
     private final Serial serial;
     private String comPort = Serial.DEFAULT_COM_PORT;
     private int speed = 9600;     // Default com speed
+    private final String terminator = "\r";
+    private final char terminatorchar = '\r';
 
     private String message;
     private ArrayBlockingQueue<String> messages = new ArrayBlockingQueue<>(20);
+    private List<MessageListener> listeners = new ArrayList<>();
 
     public SerialComms(String port, int speed) throws InterruptedException {
         if (port != null) {
@@ -45,14 +51,16 @@ public class SerialComms {
             @Override
             public void dataReceived(SerialDataEvent event) {
                 try {
-                    message = event.getString(Charset.defaultCharset());
+                    message += event.getString(Charset.defaultCharset());
                 } catch (IOException e) {
                     log.error("Cannot convert text from : " + comPort + " : " + e.getMessage(), e);
                 }
-                log.trace("Received message : " + message.trim());
+//                log.info("Pi received : [" + message + "]");
 
-                if (message.endsWith("\n")) {
-                    messages.add(message.substring(0, message.indexOf('\n')));
+                while (message.contains(terminator)) {
+                    messages.add(message.substring(0, message.indexOf(terminatorchar)));
+                    notifyListeners();
+                    message = message.substring(message.indexOf(terminatorchar) + 1);
                 }
             }
         });
@@ -88,7 +96,7 @@ public class SerialComms {
 
     public synchronized void sendMessage(String message) {
         try {
-            log.info("Message Sent : [" + message.trim() + "] port :" + comPort);
+            log.info("Message Sent : [" + message + "] port :" + comPort);
             message = message + "\r";
             serial.write(message);
         } catch (IOException ex) {
@@ -113,6 +121,22 @@ public class SerialComms {
             }
         } catch (IOException ex) {
             log.error(" ==>> SERIAL SHUTDOWN FAILED on port : " + comPort + " : " + ex.getMessage(), ex);
+        }
+    }
+
+    boolean addListener(MessageListener listener) {
+        boolean result = false;
+
+        listeners.add(listener);
+
+        return result;
+    }
+
+    private void notifyListeners() {
+        if (!listeners.isEmpty()) {
+            for (MessageListener listener : listeners) {
+                listener.messageReceived();
+            }
         }
     }
 }
