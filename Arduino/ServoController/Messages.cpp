@@ -23,7 +23,7 @@ void Messages::anySerialEvent() {
     if (inChar == '\r') {
       msgAvailable = true;
 
-      Serial.println("Arduino received [" + msgs[bufferPointer] + "]");
+//      Serial.println("Arduino received [" + msgs[bufferPointer] + "]");
 
       bufferPointer ++;
       if (bufferPointer == BUFFER_SIZE) {
@@ -34,7 +34,7 @@ void Messages::anySerialEvent() {
       msgs[bufferPointer] = "";
 
       msgCount ++;
-      Serial.println("msgCount [+" + String(msgCount) + "]");
+//      Serial.println("msgCount [+" + String(msgCount) + "]");
 
       //      if (crlf) { // If expecting a cr/lf sequence then check the next character
       //        if (Serial.available()) {
@@ -71,10 +71,10 @@ String Messages::read(boolean blocking)
     }
 
     result = String(msgs[lastRead]);
-    Serial.println("result [" + result + "]");
+//    Serial.println("result [" + result + "]");
 
     msgCount --;
-    Serial.println("msgCount [-" + String(msgCount) + "]");
+//    Serial.println("msgCount [-" + String(msgCount) + "]");
 
     if (msgCount <= 0) {
       msgAvailable = false;
