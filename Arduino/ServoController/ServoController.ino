@@ -3,7 +3,7 @@
 
 #include "messages.h"
 
-#define VERSION "1.7"
+#define VERSION "1.7b"
 
 //  Code for processing messages coming from an external source (Rasp Pi or otherwise) and transmits the resulting command to control
 //  servos. Introduced for a Ardunio Nano as I could not get the equivalent servo control code for Rasp Pi to work properly.
