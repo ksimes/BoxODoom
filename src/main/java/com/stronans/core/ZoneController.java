@@ -16,13 +16,15 @@ public class ZoneController implements Runnable, PyroElectricListener {
     private final int[] servos;
     private final SerialComms communications;
     private final PyroElectric pyroelectric;
+    private String sound;
     private boolean finished = false;
 
-    public ZoneController(SerialComms coms, PyroElectric pyroelectric, int[] servos) {
+    public ZoneController(SerialComms coms, PyroElectric pyroelectric, int[] servos, String sound) {
         this.pyroelectric = pyroelectric;
         pyroelectric.addListener(this);
         this.servos = servos;
         this.communications = coms;
+        this.sound = sound;
     }
 
     public void shutdown() {
@@ -57,5 +59,7 @@ public class ZoneController implements Runnable, PyroElectricListener {
             String msg = "{ SWP " + i + " 0 }";
             communications.sendMessage(msg);
         }
+
+        SoundControl.playSound(sound);
     }
 }

@@ -3,7 +3,8 @@
 
 #include "messages.h"
 
-#define VERSION "1.7b"
+#define VERSION "1.8"
+#define SERIAL_SPEED 115200
 
 //  Code for processing messages coming from an external source (Rasp Pi or otherwise) and transmits the resulting command to control
 //  servos. Introduced for a Ardunio Nano as I could not get the equivalent servo control code for Rasp Pi to work properly.
@@ -38,12 +39,35 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 #define MAX_ANGLE   160
 
-#define SERIAL_SPEED 115200
-
 #define FREQUENCY             60
 
 // Message processor comming in from Rasp Pi
 Messages *messages;
+
+// Servo control structure selected by servo key sent.
+struct ServoAngles {
+  int startPoint;
+  int endPoint;
+};
+
+struct ServoAngles ServoCtrl[16] = {
+  { 0, MAX_ANGLE },
+  { 0, MAX_ANGLE },
+  { 0, MAX_ANGLE },
+  { 0, MAX_ANGLE },
+  { 0, MAX_ANGLE },
+  { 0, MAX_ANGLE },
+  { 0, MAX_ANGLE },
+  { 0, MAX_ANGLE },
+  { 0, MAX_ANGLE },
+  { 0, MAX_ANGLE },
+  { 0, MAX_ANGLE },
+  { 0, MAX_ANGLE },
+  { 0, MAX_ANGLE },
+  { 0, MAX_ANGLE },
+  { 0, MAX_ANGLE },
+  { 0, MAX_ANGLE }
+};
 
 // Command structure to be executed, populated from message string sent
 struct Command {
@@ -63,33 +87,52 @@ static int getNumber(String data)
   return result;
 }
 
-static void openHorn(struct Command command) {
-  for (uint16_t pulselen = 0; pulselen < MAX_ANGLE; pulselen++) {
-    pwm.setPWM(command.servo, 0, pulseWidth(pulselen));
-    delay(command.speed * 10);
+static boolean validCmd(struct Command command) {
+  boolean result = true;
+
+  // Servo selected between 0 and 15
+  if (command.servo > -1 && command.servo < 16) result = false;
+
+  // Speed selected between 0 and 10
+  if (command.speed > -1 && command.speed < 11) result = false;
+
+  return result;
+}
+
+static void turnTo(int startPoint, int endPoint, int servo, int speed) {
+  for (uint16_t pulselen = startPoint; pulselen < endPoint; pulselen++) {
+    pwm.setPWM(servo, 0, pulseWidth(pulselen));
+    delay(speed * 10);
   }
 }
 
+static void openHorn(struct Command command) {
+  int startPoint = ServoCtrl[command.servo].startPoint;
+  int endPoint = ServoCtrl[command.servo].endPoint;
+  turnTo(startPoint, endPoint, command.servo, command.speed);
+}
+
 static void closeHorn(struct Command command) {
-  for (uint16_t pulselen = MAX_ANGLE; pulselen > 0; pulselen--) {
-    pwm.setPWM(command.servo, 0, pulseWidth(pulselen));
-    delay(command.speed * 10);
-  }
+  int endPoint = ServoCtrl[command.servo].startPoint;
+  int startPoint = ServoCtrl[command.servo].endPoint;
+  turnTo(startPoint, endPoint, command.servo, command.speed);
 }
 
 static void processCommand(struct Command command) {
 
-  if (command.cmd.compareTo("SWP") == 0) {
-    // Drive the selected servo to sweep open and then back at a certain speed
-    openHorn(command);
-    delay(500);
-    closeHorn(command);
-  } else if (command.cmd.compareTo("OPN") == 0) {
-    // Drive the selected servo to open at a certain speed
-    openHorn(command);
-  } else if (command.cmd.compareTo("CLS") == 0) {
-    // Drive the selected servo to close at a certain speed
-    closeHorn(command);
+  if (validCmd(command)) {
+    if (command.cmd.compareTo("SWP") == 0) {
+      // Drive the selected servo to sweep open and then back at a certain speed
+      openHorn(command);
+      delay(500);
+      closeHorn(command);
+    } else if (command.cmd.compareTo("OPN") == 0) {
+      // Drive the selected servo to open at a certain speed
+      openHorn(command);
+    } else if (command.cmd.compareTo("CLS") == 0) {
+      // Drive the selected servo to close at a certain speed
+      closeHorn(command);
+    }
   }
 }
 

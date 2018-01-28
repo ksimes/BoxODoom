@@ -52,6 +52,20 @@
             <version>2.7</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.mp3transform</groupId>
+            <artifactId>mp3transform</artifactId>
+            <version>0.81</version>
+            <!--<scope>system</scope>-->
+            <!--<systemPath>${project.basedir}/lib/mp3transform.jar</systemPath>-->
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/javazoom/jlayer -->
+        <dependency>
+            <groupId>javazoom</groupId>
+            <artifactId>jlayer</artifactId>
+            <version>1.0.1</version>
+        </dependency>
     </dependencies>
 
 

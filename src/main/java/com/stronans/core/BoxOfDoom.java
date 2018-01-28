@@ -37,13 +37,13 @@ public class BoxOfDoom implements MessageListener {
             // All Zones to return activations to their own class for processing
             List<ZoneController> controllers = new ArrayList<>();
             int[] zone1Servos = {0, 1, 2, 3};
-            controllers.add(new ZoneController(ServoControllerNano, new PyroElectric(ZONE1, gpio), zone1Servos));
+            controllers.add(new ZoneController(ServoControllerNano, new PyroElectric(ZONE1, gpio), zone1Servos, "example.mp3"));
             int[] zone2Servos = {4, 5, 6, 7};
-            controllers.add(new ZoneController(ServoControllerNano, new PyroElectric(ZONE2, gpio), zone2Servos));
+            controllers.add(new ZoneController(ServoControllerNano, new PyroElectric(ZONE2, gpio), zone2Servos, "example.mp3"));
             int[] zone3Servos = {8, 9, 10, 11};
-            controllers.add(new ZoneController(ServoControllerNano, new PyroElectric(ZONE3, gpio), zone3Servos));
+            controllers.add(new ZoneController(ServoControllerNano, new PyroElectric(ZONE3, gpio), zone3Servos, "angry_cat.mp3"));
             int[] zone4Servos = {12, 13, 14, 15};
-            controllers.add(new ZoneController(ServoControllerNano, new PyroElectric(ZONE4, gpio), zone4Servos));
+            controllers.add(new ZoneController(ServoControllerNano, new PyroElectric(ZONE4, gpio), zone4Servos, "angry_cat.mp3"));
 
             // Start the zones as their own threads to avoid complications with timing loops in this thread.
             for (ZoneController zone : controllers) {
@@ -52,23 +52,20 @@ public class BoxOfDoom implements MessageListener {
             }
 
             // Housekeeping at shutdown
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                                                     @Override
-                                                     public void run() {
-                                                         try {
-                                                             for (ZoneController zone : controllers) {
-                                                                 zone.shutdown();
-                                                             }
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                        try {
+                            for (ZoneController zone : controllers) {
+                                zone.shutdown();
+                            }
 
-                                                             ServoControllerNano.endComms();
-                                                             gpio.shutdown();   // <--- implement this method call if you wish to terminate the Pi4J GPIO controller
-                                                         } catch (Exception e) {
-                                                             log.error("Error: ", e);
-                                                         } finally {
-                                                             log.info("Exiting program.");
-                                                         }
-                                                     }
-                                                 }
+                            ServoControllerNano.endComms();
+                            gpio.shutdown();   // <--- implement this method call if you wish to terminate the Pi4J GPIO controller
+                        } catch (Exception e) {
+                            log.error("Error: ", e);
+                        } finally {
+                            log.info("Exiting program.");
+                        }
+                    })
 
             );
 
