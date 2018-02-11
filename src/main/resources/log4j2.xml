@@ -16,7 +16,7 @@
 
     </Appenders>
     <Loggers>
-        <Logger name="com.jpmorgan" level="INFO" additivity="false">
+        <Logger name="com.stronans" level="INFO" additivity="false">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="File"/>
         </Logger>
